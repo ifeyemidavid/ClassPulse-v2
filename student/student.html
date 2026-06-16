@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassPulse · Student</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <style>
+    :root {
+      --navy:   #0A0F1E;
+      --navy2:  #111827;
+      --blue:   #4F8EF7;
+      --teal:   #00C9A7;
+      --white:  #FFFFFF;
+      --muted:  #8A94A6;
+      --card:   #141B2D;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; line-height: 1.15; }
+
+    /* ── NAV ── */
+    .cp-nav {
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,15,30,0.9);
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem; font-weight: 800;
+      color: var(--white);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .brand span { color: var(--blue); }
+    .dot-pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--teal);
+      display: inline-block;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,201,167,.5); }
+      50%      { box-shadow: 0 0 0 6px rgba(0,201,167,0); }
+    }
+    .nav-tag {
+      font-size: .75rem; font-weight: 600;
+      background: rgba(79,142,247,.12);
+      border: 1px solid rgba(79,142,247,.2);
+      color: var(--blue);
+      padding: 4px 12px; border-radius: 100px;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      animation: fadeIn .4s ease;
+    }
+    .screen.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    /* ── CARD ── */
+    .cp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .cp-label {
+      font-size: .78rem; font-weight: 600;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+      display: block;
+    }
+    .cp-input {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--white);
+      padding: 13px 16px;
+      font-size: .95rem;
+      font-family: 'Inter', sans-serif;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .cp-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(79,142,247,.15);
+    }
+    .cp-input::placeholder { color: var(--muted); }
+
+    /* Room code input — big */
+    .room-code-input {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem; font-weight: 800;
+      text-align: center;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    .btn-primary-cp {
+      width: 100%;
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: .95rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .2s, transform .2s, box-shadow .2s;
+    }
+    .btn-primary-cp:hover:not(:disabled) {
+      opacity: .9;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(79,142,247,.3);
+    }
+    .btn-primary-cp:disabled { opacity: .45; cursor: not-allowed; }
+
+    .error-msg {
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.25);
+      color: #F87171;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: .84rem;
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    /* ── LOBBY ── */
+    .lobby-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(79,142,247,.12);
+      border: 1px solid rgba(79,142,247,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; margin: 0 auto 20px;
+    }
+    .lobby-room {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .lobby-room-code {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem; font-weight: 800;
+      letter-spacing: .2em; color: var(--blue);
+    }
+    .lobby-room-label { font-size: .75rem; color: var(--muted); margin-top: 4px; }
+    .student-count {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: .88rem; color: var(--muted);
+    }
+    .student-count .count {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 700; color: var(--teal);
+    }
+    .waiting-dots {
+      display: flex; gap: 5px; justify-content: center; margin-top: 20px;
+    }
+    .w-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--blue); opacity: .4;
+      animation: wDot 1.4s ease-in-out infinite;
+    }
+    .w-dot:nth-child(2) { animation-delay: .2s; }
+    .w-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes wDot {
+      0%,80%,100% { opacity: .4; transform: scale(.8); }
+      40%          { opacity: 1;  transform: scale(1.1); }
+    }
+
+    /* ── QUIZ ── */
+    #screen-quiz { align-items: flex-start; padding-top: 24px; }
+    .quiz-wrap { width: 100%; max-width: 640px; margin: 0 auto; }
+
+    /* Timer */
+    .timer-bar-wrap {
+      background: rgba(255,255,255,.06);
+      border-radius: 100px; height: 6px;
+      margin-bottom: 6px; overflow: hidden;
+    }
+    .timer-bar-fill {
+      height: 100%; border-radius: 100px;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      transition: width 1s linear, background .5s;
+    }
+    .timer-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px;
+    }
+    .timer-count {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem; font-weight: 800;
+      color: var(--white);
+      transition: color .3s;
+    }
+    .timer-count.urgent { color: #F87171; }
+    .q-progress { font-size: .8rem; color: var(--muted); }
+
+    /* Question card */
+    .question-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 16px;
+    }
+    .q-subject {
+      font-size: .72rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 12px;
+    }
+    .q-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem; font-weight: 700;
+      line-height: 1.4; color: var(--white);
+    }
+
+    /* Options */
+    .options-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .option-btn {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 14px;
+      transition: border-color .2s, background .2s, transform .15s;
+      text-align: left;
+      width: 100%;
+    }
+    .option-btn:hover:not(.disabled) {
+      border-color: rgba(79,142,247,.4);
+      background: rgba(79,142,247,.06);
+      transform: translateX(2px);
+    }
+    .option-btn.selected {
+      border-color: var(--blue);
+      background: rgba(79,142,247,.12);
+    }
+    .option-btn.correct {
+      border-color: var(--teal);
+      background: rgba(0,201,167,.1);
+    }
+    .option-btn.wrong {
+      border-color: #F87171;
+      background: rgba(248,113,113,.08);
+    }
+    .option-btn.disabled { cursor: not-allowed; }
+    .opt-letter {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem;
+      color: var(--muted);
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .selected .opt-letter { background: var(--blue); color: var(--white); border-color: var(--blue); }
+    .correct .opt-letter  { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .wrong .opt-letter    { background: #F87171;     color: var(--white); border-color: #F87171; }
+    .opt-text { font-size: .92rem; color: var(--white); line-height: 1.45; }
+
+    /* Confusion Meter */
+    .confusion-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 28px;
+      margin-bottom: 16px;
+    }
+    .confusion-title {
+      font-size: .78rem; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .confusion-btns { display: flex; gap: 10px; }
+    .confusion-btn {
+      flex: 1; padding: 12px 8px;
+      border-radius: 10px; border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      cursor: pointer;
+      text-align: center;
+      transition: border-color .2s, background .2s, transform .15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .confusion-btn:hover { transform: translateY(-2px); }
+    .confusion-btn .emoji { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+    .confusion-btn .label { font-size: .72rem; font-weight: 600; color: var(--muted); }
+    .confusion-btn.active-got    { border-color: var(--teal); background: rgba(0,201,167,.1); }
+    .confusion-btn.active-unsure { border-color: #F59E0B;     background: rgba(245,158,11,.1); }
+    .confusion-btn.active-lost   { border-color: #F87171;     background: rgba(248,113,113,.08); }
+    .confusion-btn.active-got    .label { color: var(--teal); }
+    .confusion-btn.active-unsure .label { color: #F59E0B; }
+    .confusion-btn.active-lost   .label { color: #F87171; }
+
+    .submit-note {
+      font-size: .78rem; color: var(--muted); text-align: center;
+      margin-top: 8px;
+    }
+
+    /* ── RESULTS ── */
+    .result-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 20px;
+    }
+    .result-icon.pass { background: rgba(0,201,167,.12); border: 1px solid rgba(0,201,167,.25); }
+    .result-icon.fail { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.25); }
+    .result-score {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.5rem; font-weight: 800;
+      line-height: 1;
+    }
+    .score-pass { color: var(--teal); }
+    .score-fail { color: #F87171; }
+    .result-breakdown {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex; justify-content: space-around;
+    }
+    .breakdown-item { text-align: center; }
+    .breakdown-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem; font-weight: 700;
+    }
+    .breakdown-lbl { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+    .btn-ghost-cp {
+      width: 100%;
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px;
+      font-size: .9rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: border-color .2s, background .2s;
+    }
+    .btn-ghost-cp:hover { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.04); }
+
+    @media (max-width: 480px) {
+      .cp-card { padding: 28px 20px; }
+      .confusion-btn .emoji { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="cp-nav">
+  <a href="../index.html" class="brand">
+    <span class="dot-pulse"></span>
+    Class<span>Pulse</span>
+  </a>
+  <span class="nav-tag">Student Portal</span>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 1 — JOIN
+════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-join">
+  <div class="cp-card">
+    <div class="text-center mb-4">
+      <div style="font-size:2rem;margin-bottom:12px">🎓</div>
+      <h2 style="font-size:1.6rem;margin-bottom:8px">Join a Class</h2>
+      <p style="font-size:.88rem;color:var(--muted)">Enter the room code your lecturer shared and your name to join.</p>
+    </div>
+
+    <div class="error-msg" id="join-error">
+      <i class="bi bi-exclamation-circle me-2"></i>
+      <span id="join-error-text">Please fill in all fields.</span>
+    </div>
+
+    <div class="mb-3">
+      <label class="cp-label">Room Code</label>
+      <input
+        class="cp-input room-code-input"
+        id="room-code"
+        type="text"
+        placeholder="ABC123"
+        maxlength="6"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <div class="mb-4">
+      <label class="cp-label">Your Name</label>
+      <input
+        class="cp-input"
+        id="student-name"
+        type="text"
+        placeholder="e.g. Amara Okafor"
+        autocomplete="off"
+      />
+    </div>
+
+    <button class="btn-primary-cp" id="join-btn" onclick="joinClass()">
+      <i class="bi bi-box-arrow-in-right"></i>
+      Join Classroom
+    </button>
+
+    <p style="font-size:.76rem;color:var(--muted);text-align:center;margin-top:16px">
+      <i class="bi bi-shield-check" style="color:var(--teal)"></i>
+      No account needed · No app download · 100% free
+    </p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     SCREEN 2 — LOBBY
+════════════════════════════════════════════════ -->
+<div class="screen" id="screen-lobby">
+  <div class="cp-card text-center">
+    <div class="lobby-icon">⏳</div>
+    <h3 style="margin-bottom:8px">You're in!</h3>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:0">
+      Waiting for your lecturer to start the session…
+    </p>
+
+    <div class="lobby-room">
+      <div class="lobby-room-code" id="lobby-code">—</div>
+      <div class="lobby-room-label">Room Code</div>
+    </div>
+
+    <div class="student-count">
+      <i class="bi bi-people-fill" style="color:var(--teal)"></i>
+      <span class="count" id="student-count-num">1</span>
+      <span>student(s) in the room</span>
+    </div>
+
+    <div class="waiting-dots">
+      <div class="w-dot"></div>
+      <div class="w-dot"></div>
+      <div class="w-dot"></div>
+    </div>
+
+    <p style="font-size:.76rem;color:var(--muted);margin-top:20px">
+      Keep this tab open. The quiz will start automatically.
+    </p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     SCREEN 3 — QUIZ
+════════════════════════════════════════════════ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-wrap">
+
+    <!-- Timer -->
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-fill" id="timer-bar" style="width:100%"></div>
+    </div>
+    <div class="timer-meta">
+      <div class="timer-count" id="timer-count">30</div>
+      <div class="q-progress" id="q-progress">Question 1 of 5</div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-card">
+      <div class="q-subject" id="q-subject">Biology · Cell Division</div>
+      <div class="q-text" id="q-text">What is the primary difference between mitosis and meiosis?</div>
+    </div>
+
+    <!-- Options -->
+    <div class="options-grid" id="options-grid">
+      <!-- Injected by JS -->
+    </div>
+
+    <!-- Confusion Meter -->
+    <div class="confusion-card">
+      <div class="confusion-title">
+        <i class="bi bi-activity" style="color:var(--teal)"></i>
+        How well do you understand this topic?
+      </div>
+      <div class="confusion-btns">
+        <button class="confusion-btn" id="conf-got" onclick="setConfusion('got', this)">
+          <span class="emoji">✅</span>
+          <span class="label">Got it</span>
+        </button>
+        <button class="confusion-btn" id="conf-unsure" onclick="setConfusion('unsure', this)">
+          <span class="emoji">🤔</span>
+          <span class="label">Unsure</span>
+        </button>
+        <button class="confusion-btn" id="conf-lost" onclick="setConfusion('lost', this)">
+          <span class="emoji">😕</span>
+          <span class="label">Lost</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="submit-note" id="submit-note">
+      <i class="bi bi-info-circle"></i>
+      Select an answer above. You can change it until the timer runs out.
+    </p>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     SCREEN 4 — RESULTS
+════════════════════════════════════════════════ -->
+<div class="screen" id="screen-results">
+  <div class="cp-card text-center">
+
+    <div class="result-icon pass" id="result-icon">🎉</div>
+    <h3 style="margin-bottom:6px" id="result-title">Great Work!</h3>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px" id="result-subtitle">
+      Here's how you did in today's session.
+    </p>
+
+    <div class="result-score score-pass" id="result-score">72%</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-top:4px;margin-bottom:0">Your Score</p>
+
+    <div class="result-breakdown">
+      <div class="breakdown-item">
+        <div class="breakdown-val" style="color:var(--teal)" id="res-correct">4</div>
+        <div class="breakdown-lbl">Correct</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-val" style="color:#F87171" id="res-wrong">1</div>
+        <div class="breakdown-lbl">Wrong</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-val" id="res-total">5</div>
+        <div class="breakdown-lbl">Questions</div>
+      </div>
+    </div>
+
+    <div id="result-feedback" style="
+      background: rgba(79,142,247,.08);
+      border: 1px solid rgba(79,142,247,.15);
+      border-radius: 12px; padding: 14px 18px;
+      font-size: .84rem; color: var(--muted);
+      text-align: left; margin-bottom: 16px; line-height: 1.6;
+    ">
+      <strong style="color:var(--white)">💡 AI Tip:</strong>
+      You answered the Cell Division question incorrectly. Review the difference between Mitosis and Meiosis before your next exam.
+    </div>
+
+    <button class="btn-primary-cp" onclick="studyWithAI()">
+      <i class="bi bi-stars"></i> Study This Topic with AI
+    </button>
+    <button class="btn-ghost-cp" onclick="goHome()">
+      <i class="bi bi-house"></i> Back to Home
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     SCREEN 5 — AI STUDY BUDDY
+════════════════════════════════════════════════ -->
+<div class="screen" id="screen-ai" style="align-items:flex-start;padding-top:20px">
+  <div style="width:100%;max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100vh - 130px)">
+
+    <!-- Chat header -->
+    <div style="
+      background:var(--card); border:1px solid var(--border);
+      border-radius:16px 16px 0 0; padding:16px 20px;
+      display:flex; align-items:center; gap:12px;
+    ">
+      <div style="
+        width:38px;height:38px;border-radius:50%;
+        background:linear-gradient(135deg,var(--blue),var(--teal));
+        display:flex;align-items:center;justify-content:center;
+        font-size:.8rem;font-weight:700;color:var(--navy);flex-shrink:0;
+      ">AI</div>
+      <div>
+        <div style="font-size:.9rem;font-weight:600">ClassPulse Study Buddy</div>
+        <div style="font-size:.72rem;color:var(--teal)" id="ai-subject-label">● Active · Today's Lesson</div>
+      </div>
+      <button onclick="showScreen('screen-results')" style="
+        margin-left:auto; background:transparent; border:1px solid var(--border);
+        color:var(--muted); border-radius:8px; padding:6px 12px;
+        font-size:.76rem; cursor:pointer; font-family:'Inter',sans-serif;
+      ">← Back</button>
+    </div>
+
+    <!-- Chat messages -->
+    <div id="chat-messages" style="
+      flex:1; overflow-y:auto; padding:20px;
+      background:var(--card);
+      border-left:1px solid var(--border);
+      border-right:1px solid var(--border);
+      display:flex; flex-direction:column; gap:12px;
+    ">
+      <div class="ai-bubble">
+        Hi <strong id="ai-student-name">there</strong>! I've seen your quiz results. You did well overall — let's focus on what you missed. Ask me anything about today's lesson or type <em>"Quiz me"</em> to practice more questions.
+      </div>
+    </div>
+
+    <!-- Chat input -->
+    <div style="
+      background:var(--card); border:1px solid var(--border);
+      border-radius:0 0 16px 16px; border-top:none;
+      padding:14px 16px; display:flex; gap:10px;
+    ">
+      <input
+        id="chat-input"
+        type="text"
+        placeholder="Ask anything about today's topic…"
+        style="
+          flex:1; background:rgba(255,255,255,.05);
+          border:1px solid var(--border); border-radius:10px;
+          color:var(--white); padding:11px 14px;
+          font-size:.9rem; font-family:'Inter',sans-serif; outline:none;
+        "
+        onkeydown="if(event.key==='Enter') sendMessage()"
+      />
+      <button onclick="sendMessage()" style="
+        background:var(--blue); border:none; border-radius:10px;
+        color:var(--white); padding:11px 16px; cursor:pointer;
+        font-size:1rem; transition:opacity .2s;
+      "><i class="bi bi-send-fill"></i></button>
+    </div>
+
+  </div>
+</div>
+
+
+<style>
+  .ai-bubble {
+    max-width: 85%;
+    background: rgba(79,142,247,.1);
+    border: 1px solid rgba(79,142,247,.15);
+    border-radius: 4px 14px 14px 14px;
+    padding: 11px 14px;
+    font-size: .86rem; line-height: 1.55;
+    color: var(--white);
+    align-self: flex-start;
+  }
+  .student-bubble {
+    max-width: 85%;
+    background: var(--blue);
+    border-radius: 14px 4px 14px 14px;
+    padding: 11px 14px;
+    font-size: .86rem; line-height: 1.55;
+    color: var(--white);
+    align-self: flex-end;
+  }
+  .typing-bubble {
+    max-width: 80px;
+    background: rgba(79,142,247,.08);
+    border: 1px solid rgba(79,142,247,.12);
+    border-radius: 4px 14px 14px 14px;
+    padding: 11px 16px;
+    align-self: flex-start;
+    display: flex; gap: 4px; align-items: center;
+  }
+  .td { width:7px;height:7px;border-radius:50%;background:var(--blue);opacity:.5;
+    animation:tdBounce 1.2s ease-in-out infinite; }
+  .td:nth-child(2){animation-delay:.2s}
+  .td:nth-child(3){animation-delay:.4s}
+  @keyframes tdBounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+</style>
+
+
+<script>
+  // ── STATE ────────────────────────────────────
+  let studentName = '';
+  let roomCode    = '';
+  let timerInterval = null;
+  let timeLeft    = 30;
+  let totalTime   = 30;
+  let currentQ    = 0;
+  let selectedAnswer = null;
+  let confusionState = null;
+  let score = 0;
+
+  // Demo questions (will be replaced by real Supabase data later)
+  const demoQuestions = [
+    {
+      subject: 'Biology · Cell Division',
+      text: 'What is the primary difference between mitosis and meiosis?',
+      options: [
+        'Mitosis produces 4 cells; meiosis produces 2',
+        'Mitosis produces 2 identical cells; meiosis produces 4 unique cells',
+        'Both processes produce identical daughter cells',
+        'Meiosis only occurs in plant cells'
+      ],
+      correct: 1
+    },
+    {
+      subject: 'Biology · Cell Division',
+      text: 'Which phase of mitosis involves chromosomes lining up at the cell\'s equator?',
+      options: ['Prophase', 'Anaphase', 'Metaphase', 'Telophase'],
+      correct: 2
+    },
+    {
+      subject: 'Biology · Cell Division',
+      text: 'How many chromosomes does a human cell have after meiosis?',
+      options: ['46', '23', '92', '48'],
+      correct: 1
+    }
+  ];
+
+  let answers = new Array(demoQuestions.length).fill(null);
+
+  // ── SCREENS ──────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── JOIN ─────────────────────────────────────
+  function joinClass() {
+    const code = document.getElementById('room-code').value.trim().toUpperCase();
+    const name = document.getElementById('student-name').value.trim();
+    const err  = document.getElementById('join-error');
+    const errT = document.getElementById('join-error-text');
+
+    if (!code || !name) {
+      errT.textContent = 'Please enter both your room code and name.';
+      err.style.display = 'block'; return;
+    }
+    if (code.length < 4) {
+      errT.textContent = 'Room code must be at least 4 characters.';
+      err.style.display = 'block'; return;
+    }
+
+    err.style.display = 'none';
+    studentName = name;
+    roomCode    = code;
+
+    document.getElementById('lobby-code').textContent = code;
+    document.getElementById('ai-student-name').textContent = name.split(' ')[0];
+
+    showScreen('screen-lobby');
+
+    // Simulate count going up
+    let count = 1;
+    const countEl = document.getElementById('student-count-num');
+    const countInterval = setInterval(() => {
+      count += Math.floor(Math.random() * 3) + 1;
+      if (count > 28) { count = 28; clearInterval(countInterval); }
+      countEl.textContent = count;
+    }, 1200);
+
+    // Demo: auto-start quiz after 4 seconds
+    // In production this will be triggered by Supabase real-time
+    setTimeout(() => {
+      clearInterval(countInterval);
+      startQuiz();
+    }, 4000);
+  }
+
+  // ── QUIZ ─────────────────────────────────────
+  function startQuiz() {
+    currentQ = 0;
+    score    = 0;
+    answers  = new Array(demoQuestions.length).fill(null);
+    loadQuestion(currentQ);
+    showScreen('screen-quiz');
+  }
+
+  function loadQuestion(index) {
+    const q = demoQuestions[index];
+    selectedAnswer = answers[index];
+    confusionState = null;
+
+    // Reset confusion
+    document.querySelectorAll('.confusion-btn').forEach(b => b.className = 'confusion-btn');
+
+    document.getElementById('q-subject').textContent  = q.subject;
+    document.getElementById('q-text').textContent     = q.text;
+    document.getElementById('q-progress').textContent = `Question ${index + 1} of ${demoQuestions.length}`;
+    document.getElementById('submit-note').innerHTML  =
+      '<i class="bi bi-info-circle"></i> Select an answer above. You can change it until the timer runs out.';
+
+    // Build options
+    const grid = document.getElementById('options-grid');
+    grid.innerHTML = '';
+    const letters = ['A','B','C','D'];
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn' + (selectedAnswer === i ? ' selected' : '');
+      btn.setAttribute('data-index', i);
+      btn.innerHTML = `
+        <div class="opt-letter">${letters[i]}</div>
+        <div class="opt-text">${opt}</div>
+      `;
+      btn.onclick = () => selectOption(i, btn);
+      grid.appendChild(btn);
+    });
+
+    // Timer
+    startTimer(30);
+  }
+
+  function selectOption(index, btn) {
+    if (btn.classList.contains('disabled')) return;
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedAnswer = index;
+    answers[currentQ] = index;
+    document.getElementById('submit-note').innerHTML =
+      `<i class="bi bi-check-circle" style="color:var(--teal)"></i> Answer saved. You can still change it before the timer ends.`;
+  }
+
+  function setConfusion(state, btn) {
+    confusionState = state;
+    document.querySelectorAll('.confusion-btn').forEach(b => {
+      b.classList.remove('active-got','active-unsure','active-lost');
+    });
+    btn.classList.add('active-' + state);
+  }
+
+  function startTimer(seconds) {
+    clearInterval(timerInterval);
+    timeLeft  = seconds;
+    totalTime = seconds;
+    updateTimer();
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+      if (timeLeft <= 0) { clearInterval(timerInterval); timeExpired(); }
+    }, 1000);
+  }
+
+  function updateTimer() {
+    const el  = document.getElementById('timer-count');
+    const bar = document.getElementById('timer-bar');
+    el.textContent = timeLeft;
+    bar.style.width = ((timeLeft / totalTime) * 100) + '%';
+    if (timeLeft <= 10) {
+      el.classList.add('urgent');
+      bar.style.background = 'linear-gradient(90deg,#F87171,#F59E0B)';
+    } else {
+      el.classList.remove('urgent');
+      bar.style.background = 'linear-gradient(90deg,var(--teal),var(--blue))';
+    }
+  }
+
+  function timeExpired() {
+    // Lock options
+    const q = demoQuestions[currentQ];
+    document.querySelectorAll('.option-btn').forEach((btn, i) => {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('correct');
+      else if (i === selectedAnswer && selectedAnswer !== q.correct) btn.classList.add('wrong');
+    });
+
+    if (selectedAnswer === q.correct) score++;
+
+    document.getElementById('submit-note').innerHTML =
+      selectedAnswer === q.correct
+        ? `<i class="bi bi-check-circle-fill" style="color:var(--teal)"></i> <strong style="color:var(--teal)">Correct!</strong>`
+        : selectedAnswer !== null
+          ? `<i class="bi bi-x-circle-fill" style="color:#F87171"></i> <strong style="color:#F87171">Incorrect.</strong> The correct answer was ${['A','B','C','D'][q.correct]}.`
+          : `<i class="bi bi-dash-circle" style="color:var(--muted)"></i> Time's up — you didn't answer this one.`;
+
+    // Move to next after 2.5s
+    setTimeout(() => {
+      if (currentQ + 1 < demoQuestions.length) {
+        currentQ++;
+        loadQuestion(currentQ);
+      } else {
+        showResults();
+      }
+    }, 2500);
+  }
+
+  // ── RESULTS ──────────────────────────────────
+  function showResults() {
+    const total   = demoQuestions.length;
+    const wrong   = total - score;
+    const pct     = Math.round((score / total) * 100);
+    const pass    = pct >= 50;
+
+    document.getElementById('result-score').textContent    = pct + '%';
+    document.getElementById('result-score').className      = 'result-score ' + (pass ? 'score-pass' : 'score-fail');
+    document.getElementById('result-icon').textContent     = pass ? '🎉' : '📚';
+    document.getElementById('result-icon').className       = 'result-icon ' + (pass ? 'pass' : 'fail');
+    document.getElementById('result-title').textContent    = pass ? 'Great Work, ' + studentName.split(' ')[0] + '!' : 'Keep Studying!';
+    document.getElementById('result-subtitle').textContent = pass
+      ? 'You passed today\'s session. Here\'s your breakdown.'
+      : 'Don\'t worry — that\'s what studying is for!';
+    document.getElementById('res-correct').textContent = score;
+    document.getElementById('res-wrong').textContent   = wrong;
+    document.getElementById('res-total').textContent   = total;
+
+    showScreen('screen-results');
+  }
+
+  function studyWithAI() {
+    document.getElementById('ai-subject-label').textContent = '● Active · ' + demoQuestions[0].subject;
+    showScreen('screen-ai');
+  }
+
+  function goHome() {
+    window.location.href = '../index.html';
+  }
+
+  // ── AI STUDY BUDDY (demo) ─────────────────────
+  const demoReplies = [
+    "Great question! Mitosis produces 2 genetically identical daughter cells used for growth. Meiosis produces 4 unique cells used for reproduction — and has two rounds of division.",
+    "The phases of mitosis in order are: Prophase → Metaphase → Anaphase → Telophase → Cytokinesis. A helpful mnemonic: <strong>PMATC</strong> — Please Make A Terrible Cell.",
+    "In meiosis, crossing over happens during Prophase I — this is what creates genetic diversity between the 4 daughter cells.",
+    "Want me to quiz you on what you just learned? Type <em>'Quiz me'</em> and I'll ask you a question!"
+  ];
+  let replyIndex = 0;
+
+  function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text  = input.value.trim();
+    if (!text) return;
+    input.value = '';
+
+    const msgs = document.getElementById('chat-messages');
+
+    // Student message
+    const studentMsg = document.createElement('div');
+    studentMsg.className = 'student-bubble';
+    studentMsg.textContent = text;
+    msgs.appendChild(studentMsg);
+
+    // Typing indicator
+    const typing = document.createElement('div');
+    typing.className = 'typing-bubble';
+    typing.innerHTML = '<div class="td"></div><div class="td"></div><div class="td"></div>';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    // AI reply
+    setTimeout(() => {
+      msgs.removeChild(typing);
+      const aiMsg = document.createElement('div');
+      aiMsg.className = 'ai-bubble';
+      aiMsg.innerHTML = demoReplies[replyIndex % demoReplies.length];
+      replyIndex++;
+      msgs.appendChild(aiMsg);
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 1400);
+  }
+
+  // Auto-uppercase room code
+  document.getElementById('room-code').addEventListener('input', function() {
+    this.value = this.value.toUpperCase();
+  });
+</script>
+
+</body>
+</html>

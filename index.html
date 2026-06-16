@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClassPulse · Real-Time Classroom Intelligence</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      /* ── TOKENS ─────────────────────────────── */
+      :root {
+        --navy: #0a0f1e;
+        --navy2: #111827;
+        --blue: #4f8ef7;
+        --teal: #00c9a7;
+        --white: #ffffff;
+        --muted: #8a94a6;
+        --card: #141b2d;
+        --border: rgba(255, 255, 255, 0.07);
+        --glow: rgba(79, 142, 247, 0.18);
+      }
+
+      /* ── BASE ───────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--navy);
+        color: var(--white);
+        font-family: "Inter", sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5 {
+        font-family: "Syne", sans-serif;
+        line-height: 1.15;
+      }
+      a {
+        text-decoration: none;
+      }
+
+      /* ── NAVBAR ─────────────────────────────── */
+      .cp-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        padding: 18px 0;
+        background: rgba(10, 15, 30, 0.85);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+        transition: padding 0.3s;
+      }
+      .cp-nav .brand {
+        font-family: "Syne", sans-serif;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .cp-nav .brand span {
+        color: var(--blue);
+      }
+      .dot-pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--teal);
+        display: inline-block;
+        animation: pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 201, 167, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 0 6px rgba(0, 201, 167, 0);
+        }
+      }
+      .nav-links a {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-left: 28px;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: var(--white);
+      }
+      .btn-nav {
+        background: var(--blue);
+        color: var(--white) !important;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+      }
+      .btn-nav:hover {
+        opacity: 0.88;
+        transform: translateY(-1px);
+      }
+
+      /* ── HERO ───────────────────────────────── */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 120px 0 80px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-grid {
+     .hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  pointer-events: none;
+   }
+      }
+      .hero-glow {
+        position: absolute;
+        top: -10%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 700px;
+        height: 500px;
+        background: radial-gradient(
+          ellipse,
+          rgba(79, 142, 247, 0.15) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(79, 142, 247, 0.12);
+        border: 1px solid rgba(79, 142, 247, 0.25);
+        color: var(--blue);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 14px;
+        border-radius: 100px;
+        margin-bottom: 28px;
+      }
+      .hero h1 {
+        font-size: clamp(2.6rem, 6vw, 4.2rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        margin-bottom: 24px;
+      }
+      .hero h1 .accent {
+        color: var(--blue);
+      }
+      .hero h1 .accent-teal {
+        color: var(--teal);
+      }
+      .hero-sub {
+        font-size: 1.1rem;
+        color: var(--muted);
+        max-width: 520px;
+        margin-bottom: 40px;
+        line-height: 1.7;
+      }
+      .hero-ctas {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 56px;
+      }
+      .btn-primary-cp {
+        background: var(--blue);
+        color: var(--white);
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        border: none;
+      }
+      .btn-primary-cp:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(79, 142, 247, 0.35);
+        color: var(--white);
+      }
+      .btn-ghost-cp {
+        background: transparent;
+        color: var(--white);
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--border);
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .btn-ghost-cp:hover {
+        border-color: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--white);
+      }
+      .hero-trust {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .trust-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .trust-badge i {
+        color: var(--teal);
+        font-size: 0.85rem;
+      }
+
+      /* Hero mock dashboard */
+      .hero-visual {
+        position: relative;
+      }
+      .mock-dashboard {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.5),
+          0 0 0 1px var(--border);
+      }
+      .mock-topbar {
+        background: #0d1526;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      .mock-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .mock-body {
+        padding: 20px;
+      }
+      .mock-title {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 14px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .mock-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        height: 80px;
+        margin-bottom: 18px;
+      }
+      .mock-bar {
+        flex: 1;
+        border-radius: 5px 5px 0 0;
+        background: var(--blue);
+        opacity: 0.75;
+        animation: barGrow 0.8s ease forwards;
+        transform-origin: bottom;
+      }
+      @keyframes barGrow {
+        from {
+          transform: scaleY(0);
+        }
+        to {
+          transform: scaleY(1);
+        }
+      }
+      .mock-bar.correct {
+        background: var(--teal);
+        opacity: 0.9;
+      }
+      .mock-bar.wrong {
+        background: #f87171;
+        opacity: 0.7;
+      }
+      .mock-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .mock-stat {
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 8px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+      }
+      .mock-stat-val {
+        font-family: "Syne", sans-serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--white);
+      }
+      .mock-stat-lbl {
+        font-size: 0.68rem;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .mock-confusion {
+        margin-top: 4px;
+      }
+      .confusion-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .confusion-label {
+        font-size: 0.72rem;
+        color: var(--muted);
+        width: 50px;
+      }
+      .confusion-bar-wrap {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 4px;
+        height: 6px;
+      }
+      .confusion-fill {
+        height: 100%;
+        border-radius: 4px;
+      }
+      .fill-got {
+        background: var(--teal);
+        width: 64%;
+      }
+      .fill-unsure {
+        background: #f59e0b;
+        width: 24%;
+      }
+      .fill-lost {
+        background: #f87171;
+        width: 12%;
+      }
+      .confusion-pct {
+        font-size: 0.7rem;
+        color: var(--muted);
+        width: 28px;
+        text-align: right;
+      }
+      .mock-badge {
+        position: absolute;
+        top: -14px;
+        right: -14px;
+        background: var(--teal);
+        color: var(--navy);
+        font-family: "Syne", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 100px;
+        box-shadow: 0 4px 14px rgba(0, 201, 167, 0.4);
+      }
+
+      /* ── SECTION SHARED ─────────────────────── */
+      section {
+        padding: 96px 0;
+      }
+      .section-eyebrow {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--blue);
+        margin-bottom: 14px;
+      }
+      .section-title {
+        font-size: clamp(1.9rem, 4vw, 2.8rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 16px;
+      }
+      .section-sub {
+        color: var(--muted);
+        font-size: 1rem;
+        max-width: 520px;
+        line-height: 1.7;
+      }
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 0;
+      }
+
+      /* ── PROBLEM ────────────────────────────── */
+      .problem-section {
+        background: var(--navy2);
+      }
+      .problem-number {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(4rem, 10vw, 7rem);
+        font-weight: 800;
+        line-height: 1;
+        background: linear-gradient(135deg, var(--blue), var(--teal));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        margin-bottom: 8px;
+      }
+      .problem-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 28px;
+        height: 100%;
+        transition: border-color 0.25s;
+      }
+      .problem-card:hover {
+        border-color: rgba(79, 142, 247, 0.3);
+      }
+      .problem-card .icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        margin-bottom: 16px;
+      }
+      .icon-red {
+        background: rgba(248, 113, 113, 0.12);
+        color: #f87171;
+      }
+      .icon-amber {
+        background: rgba(245, 158, 11, 0.12);
+        color: #f59e0b;
+      }
+      .icon-purple {
+        background: rgba(167, 139, 250, 0.12);
+        color: #a78bfa;
+      }
+      .problem-card h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .problem-card p {
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      /* ── HOW IT WORKS ───────────────────────── */
+      .step-line {
+        display: flex;
+        gap: 0;
+        align-items: stretch;
+      }
+      .step-num-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-right: 24px;
+      }
+      .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--blue);
+        color: var(--white);
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+      }
+      .step-connector {
+        flex: 1;
+        width: 2px;
+        background: linear-gradient(var(--blue), var(--teal));
+        margin: 4px auto 0;
+        opacity: 0.3;
+      }
+      .step-content {
+        padding-bottom: 40px;
+      }
+      .step-content h4 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .step-content p {
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .step-tag {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 100px;
+        margin-bottom: 10px;
+      }
+      .tag-student {
+        background: rgba(79, 142, 247, 0.12);
+        color: var(--blue);
+      }
+      .tag-teacher {
+        background: rgba(0, 201, 167, 0.12);
+        color: var(--teal);
+      }
+      .tag-ai {
+        background: rgba(167, 139, 250, 0.12);
+        color: #a78bfa;
+      }
+
+      /* ── FEATURES ───────────────────────────── */
+      .features-section {
+        background: var(--navy2);
+      }
+      .feat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 28px;
+        height: 100%;
+        transition:
+          transform 0.25s,
+          border-color 0.25s,
+          box-shadow 0.25s;
+      }
+      .feat-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(79, 142, 247, 0.3);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+      }
+      .feat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 18px;
+      }
+      .fi-blue {
+        background: rgba(79, 142, 247, 0.12);
+        color: var(--blue);
+      }
+      .fi-teal {
+        background: rgba(0, 201, 167, 0.12);
+        color: var(--teal);
+      }
+      .fi-purple {
+        background: rgba(167, 139, 250, 0.12);
+        color: #a78bfa;
+      }
+      .fi-amber {
+        background: rgba(245, 158, 11, 0.12);
+        color: #f59e0b;
+      }
+      .fi-red {
+        background: rgba(248, 113, 113, 0.12);
+        color: #f87171;
+      }
+      .fi-green {
+        background: rgba(52, 211, 153, 0.12);
+        color: #34d399;
+      }
+      .feat-card h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .feat-card p {
+        font-size: 0.86rem;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      /* ── AI SECTION ─────────────────────────── */
+      .ai-section {
+        position: relative;
+        overflow: hidden;
+      }
+      .ai-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 400px;
+        background: radial-gradient(
+          ellipse,
+          rgba(0, 201, 167, 0.1) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .ai-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 201, 167, 0.1);
+        border: 1px solid rgba(0, 201, 167, 0.25);
+        color: var(--teal);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 14px;
+        border-radius: 100px;
+        margin-bottom: 24px;
+      }
+      .ai-feature-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .ai-feature-row:last-child {
+        border-bottom: none;
+      }
+      .ai-feature-row .icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        background: rgba(0, 201, 167, 0.1);
+        color: var(--teal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+      .ai-feature-row h5 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .ai-feature-row p {
+        font-size: 0.84rem;
+        color: var(--muted);
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      /* Chat mock */
+      .chat-mock {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .chat-header {
+        background: #0d1526;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid var(--border);
+      }
+      .chat-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--blue), var(--teal));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--navy);
+      }
+      .chat-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .chat-status {
+        font-size: 0.72rem;
+        color: var(--teal);
+      }
+      .chat-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .chat-msg {
+        max-width: 85%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        line-height: 1.5;
+      }
+      .chat-msg.ai {
+        background: rgba(79, 142, 247, 0.1);
+        border: 1px solid rgba(79, 142, 247, 0.15);
+        color: var(--white);
+        align-self: flex-start;
+        border-radius: 4px 12px 12px 12px;
+      }
+      .chat-msg.student {
+        background: var(--blue);
+        color: var(--white);
+        align-self: flex-end;
+        border-radius: 12px 4px 12px 12px;
+      }
+      .chat-typing {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        padding: 10px 14px;
+        background: rgba(79, 142, 247, 0.08);
+        border: 1px solid rgba(79, 142, 247, 0.12);
+        border-radius: 4px 12px 12px 12px;
+        align-self: flex-start;
+        width: fit-content;
+      }
+      .typing-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--blue);
+        opacity: 0.6;
+        animation: typingBounce 1.2s ease-in-out infinite;
+      }
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes typingBounce {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-5px);
+        }
+      }
+
+      /* ── STATS BAR ──────────────────────────── */
+      .stats-bar {
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 48px 0;
+      }
+      .stat-item {
+        text-align: center;
+        padding: 16px;
+      }
+      .stat-val {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--blue), var(--teal));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .stat-lbl {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      /* ── FOOTER ─────────────────────────────── */
+      footer {
+        background: var(--navy2);
+        border-top: 1px solid var(--border);
+        padding: 48px 0 32px;
+      }
+      .footer-brand {
+        font-family: "Syne", sans-serif;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--white);
+        margin-bottom: 10px;
+      }
+      .footer-brand span {
+        color: var(--blue);
+      }
+      .footer-sub {
+        font-size: 0.84rem;
+        color: var(--muted);
+        max-width: 260px;
+        line-height: 1.6;
+      }
+      .footer-link-group h6 {
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 14px;
+      }
+      .footer-link-group a {
+        display: block;
+        font-size: 0.84rem;
+        color: var(--muted);
+        margin-bottom: 8px;
+        transition: color 0.2s;
+      }
+      .footer-link-group a:hover {
+        color: var(--white);
+      }
+      .footer-bottom {
+        border-top: 1px solid var(--border);
+        margin-top: 40px;
+        padding-top: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .footer-bottom p {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      /* ── MOBILE ─────────────────────────────── */
+      @media (max-width: 768px) {
+        .hero {
+          padding-top: 100px;
+        }
+        .hero-visual {
+          margin-top: 48px;
+        }
+        .nav-links {
+          display: none;
+        }
+        .stat-item {
+          border-right: none !important;
+        }
+        .mock-badge {
+          top: -10px;
+          right: -6px;
+          font-size: 0.7rem;
+          padding: 5px 10px;
+        }
+      }
+
+      /* ── SCROLL REVEAL ──────────────────────── */
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══ NAVBAR ═══════════════════════════════════════════════════════════ -->
+    <nav class="cp-nav">
+      <div class="container d-flex align-items-center justify-content-between">
+        <a href="#" class="brand">
+          <span class="dot-pulse"></span>
+          Class<span>Pulse</span>
+        </a>
+        <div class="nav-links d-flex align-items-center">
+          <a href="#problem">Problem</a>
+          <a href="#features">Features</a>
+          <a href="#ai">AI Tools</a>
+          <a href="student/student.html" class="btn-nav ms-3">Get Started</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ═══ HERO ══════════════════════════════════════════════════════════════ -->
+    <section class="hero" id="home">
+      <div class="hero-grid"></div>
+      <div class="hero-glow"></div>
+      <div class="container">
+        <div class="row align-items-center g-5">
+          <!-- Left -->
+          <div class="col-lg-6">
+            <div class="hero-eyebrow">
+              <span class="dot-pulse"></span>
+              Built for African Classrooms
+            </div>
+            <h1>
+              The classroom<br />
+              finally <span class="accent">talks back</span><br />
+              to the <span class="accent-teal">teacher</span>
+            </h1>
+            <p class="hero-sub">
+              ClassPulse turns every lecture into a live data stream — real-time
+              quiz responses, AI-generated questions from your notes, and
+              instant student insights. Works on 2G. No app download. Zero
+              setup.
+            </p>
+            <div class="hero-ctas">
+              <a href="student/student.html" onclick="window.location.href='student/student.html'" class="btn-primary-cp">
+                <i class="bi bi-mortarboard-fill"></i> I'm a Student
+              </a>
+              <a href="teacher/login.html" class="btn-ghost-cp">
+                <i class="bi bi-person-workspace"></i> I'm a Lecturer
+              </a>
+            </div>
+            <div class="hero-trust">
+              <div class="trust-badge">
+                <i class="bi bi-check-circle-fill"></i> No login required for
+                students
+              </div>
+              <div class="trust-badge">
+                <i class="bi bi-check-circle-fill"></i> Works on any device
+              </div>
+              <div class="trust-badge">
+                <i class="bi bi-check-circle-fill"></i> AI-powered analytics
+              </div>
+            </div>
+          </div>
+
+          <!-- Right — mock dashboard -->
+          <div class="col-lg-6">
+            <div class="hero-visual">
+              <span class="mock-badge">🔴 LIVE SESSION</span>
+              <div class="mock-dashboard">
+                <div class="mock-topbar">
+                  <div class="mock-dot" style="background: #f87171"></div>
+                  <div class="mock-dot" style="background: #f59e0b"></div>
+                  <div class="mock-dot" style="background: #34d399"></div>
+                  <span
+                    style="
+                      font-size: 0.75rem;
+                      color: var(--muted);
+                      margin-left: 10px;
+                    "
+                    >Teacher Live Dashboard</span
+                  >
+                </div>
+                <div class="mock-body">
+                  <div class="mock-title">
+                    Question 3 of 5 · 28 students responded
+                  </div>
+                  <div class="mock-bars">
+                    <div class="mock-bar correct" style="height: 70%"></div>
+                    <div
+                      class="mock-bar wrong"
+                      style="height: 25%; animation-delay: 0.1s"
+                    ></div>
+                    <div
+                      class="mock-bar wrong"
+                      style="height: 40%; animation-delay: 0.2s"
+                    ></div>
+                    <div
+                      class="mock-bar correct"
+                      style="height: 60%; animation-delay: 0.15s"
+                    ></div>
+                  </div>
+                  <div class="mock-stats">
+                    <div class="mock-stat">
+                      <div class="mock-stat-val" style="color: var(--teal)">
+                        72%
+                      </div>
+                      <div class="mock-stat-lbl">Avg. score</div>
+                    </div>
+                    <div class="mock-stat">
+                      <div class="mock-stat-val">28</div>
+                      <div class="mock-stat-lbl">Responded</div>
+                    </div>
+                    <div class="mock-stat">
+                      <div class="mock-stat-val" style="color: var(--blue)">
+                        4
+                      </div>
+                      <div class="mock-stat-lbl">Need help</div>
+                    </div>
+                  </div>
+                  <div class="mock-confusion">
+                    <div class="mock-title" style="margin-bottom: 10px">
+                      Confusion Meter
+                    </div>
+                    <div class="confusion-row">
+                      <span class="confusion-label">Got it</span>
+                      <div class="confusion-bar-wrap">
+                        <div class="confusion-fill fill-got"></div>
+                      </div>
+                      <span class="confusion-pct">64%</span>
+                    </div>
+                    <div class="confusion-row">
+                      <span class="confusion-label">Unsure</span>
+                      <div class="confusion-bar-wrap">
+                        <div class="confusion-fill fill-unsure"></div>
+                      </div>
+                      <span class="confusion-pct">24%</span>
+                    </div>
+                    <div class="confusion-row">
+                      <span class="confusion-label">Lost</span>
+                      <div class="confusion-bar-wrap">
+                        <div class="confusion-fill fill-lost"></div>
+                      </div>
+                      <span class="confusion-pct">12%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ═══ PROBLEM ═══════════════════════════════════════════════════════════ -->
+    <section class="problem-section" id="problem">
+      <div class="container">
+        <div class="row align-items-center g-5 mb-5">
+          <div class="col-lg-5 reveal">
+            <div class="section-eyebrow">The Problem</div>
+            <h2 class="section-title">27 silent students in every classroom</h2>
+            <p class="section-sub">
+              A teacher asks a question. 3 hands go up. What about the other 27?
+              Are they understanding? Lost? Asleep? No teacher has ever truly
+              known — until now.
+            </p>
+          </div>
+          <div class="col-lg-7">
+            <div class="row g-3">
+              <div class="col-md-4 reveal" style="transition-delay: 0.1s">
+                <div class="problem-card">
+                  <div class="icon icon-red">
+                    <i class="bi bi-x-circle"></i>
+                  </div>
+                  <h4>Tools that crash</h4>
+                  <p>
+                    Existing platforms are too heavy for budget Android devices
+                    and 3G networks common across Africa.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-4 reveal" style="transition-delay: 0.2s">
+                <div class="problem-card">
+                  <div class="icon icon-amber">
+                    <i class="bi bi-controller"></i>
+                  </div>
+                  <h4>Gamification over learning</h4>
+                  <p>
+                    Leaderboards and animations make engagement a game — not a
+                    serious academic feedback loop.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-4 reveal" style="transition-delay: 0.3s">
+                <div class="problem-card">
+                  <div class="icon icon-purple">
+                    <i class="bi bi-eye-slash"></i>
+                  </div>
+                  <h4>Teachers fly blind</h4>
+                  <p>
+                    No real-time signal of who is struggling. Failure only
+                    becomes visible when exam results come back.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="text-center mt-4 reveal" style="transition-delay: 0.4s">
+              <span class="problem-number">27</span>
+              <p style="color: var(--muted); font-size: 0.9rem">
+                students whose confusion goes undetected every single class
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ═══ HOW IT WORKS ══════════════════════════════════════════════════════ -->
+    <section id="how">
+      <div class="container">
+        <div class="row g-5">
+          <div class="col-lg-4 reveal">
+            <div class="section-eyebrow">How It Works</div>
+            <h2 class="section-title">Live in under 60 seconds</h2>
+            <p class="section-sub">
+              No app. No account for students. Just a room code and a browser.
+              The simplest path from zero to full classroom intelligence.
+            </p>
+          </div>
+          <div class="col-lg-8">
+            <!-- Steps -->
+            <div class="step-line reveal" style="transition-delay: 0.1s">
+              <div class="step-num-col">
+                <div class="step-circle">1</div>
+                <div class="step-connector"></div>
+              </div>
+              <div class="step-content">
+                <span class="step-tag tag-teacher">Lecturer</span>
+                <h4>Create a session & upload your notes</h4>
+                <p>
+                  Log in, create a classroom session, and optionally upload your
+                  PDF lecture notes. ClassPulse AI reads the content instantly.
+                </p>
+              </div>
+            </div>
+            <div class="step-line reveal" style="transition-delay: 0.2s">
+              <div class="step-num-col">
+                <div class="step-circle">2</div>
+                <div class="step-connector"></div>
+              </div>
+              <div class="step-content">
+                <span class="step-tag tag-ai">AI</span>
+                <h4>AI generates questions from your material</h4>
+                <p>
+                  Gemini AI extracts key concepts from your notes and creates
+                  multiple-choice questions with plausible distractors. You
+                  review before launching.
+                </p>
+              </div>
+            </div>
+            <div class="step-line reveal" style="transition-delay: 0.3s">
+              <div class="step-num-col">
+                <div class="step-circle">3</div>
+                <div class="step-connector"></div>
+              </div>
+              <div class="step-content">
+                <span class="step-tag tag-student">Student</span>
+                <h4>Students join with a 6-digit room code</h4>
+                <p>
+                  Students open any browser, enter the room code and their name.
+                  No sign-up, no app install. They're live in 5 seconds.
+                </p>
+              </div>
+            </div>
+            <div class="step-line reveal" style="transition-delay: 0.4s">
+              <div class="step-num-col">
+                <div class="step-circle">4</div>
+              </div>
+              <div class="step-content" style="padding-bottom: 0">
+                <span class="step-tag tag-teacher">Lecturer</span>
+                <h4>Watch the classroom come alive in real time</h4>
+                <p>
+                  See every student's answer as it happens. The confusion meter,
+                  live bar charts, and AI analytics report tell you exactly who
+                  needs help — and what to re-teach tomorrow.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ═══ FEATURES ══════════════════════════════════════════════════════════ -->
+    <section class="features-section" id="features">
+      <div class="container">
+        <div class="text-center mb-5 reveal">
+          <div class="section-eyebrow">Features</div>
+          <h2 class="section-title">
+            Everything a teacher needs.<br />Nothing they don't.
+          </h2>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-4 reveal" style="transition-delay: 0.05s">
+            <div class="feat-card">
+              <div class="feat-icon fi-teal">
+                <i class="bi bi-emoji-frown"></i>
+              </div>
+              <h4>Confusion Meter</h4>
+              <p>
+                Students anonymously signal "Got it", "Unsure", or "Lost" in
+                real time. Teachers get a live heatmap — not an exam result
+                three weeks later.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4 reveal" style="transition-delay: 0.1s">
+            <div class="feat-card">
+              <div class="feat-icon fi-purple"><i class="bi bi-robot"></i></div>
+              <h4>AI Question Generator</h4>
+              <p>
+                Upload a PDF or paste lecture notes. Gemini AI generates quiz
+                questions tuned to your exact content. You always review before
+                publishing.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4 reveal" style="transition-delay: 0.15s">
+            <div class="feat-card">
+              <div class="feat-icon fi-blue">
+                <i class="bi bi-bar-chart-line"></i>
+              </div>
+              <h4>Live Analytics Dashboard</h4>
+              <p>
+                Real-time bar charts, response rates, and per-student status.
+                See which answer options students are picking as they pick them.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4 reveal" style="transition-delay: 0.2s">
+            <div class="feat-card">
+              <div class="feat-icon fi-amber">
+                <i class="bi bi-file-earmark-text"></i>
+              </div>
+              <h4>AI Session Report</h4>
+              <p>
+                When the session ends, an AI report identifies weak topics,
+                students needing intervention, and which questions to re-teach.
+                Done in seconds.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4 reveal" style="transition-delay: 0.25s">
+            <div class="feat-card">
+              <div class="feat-icon fi-green"><i class="bi bi-wifi"></i></div>
+              <h4>Works on 2G Networks</h4>
+              <p>
+                2-second polling instead of WebSockets. Sub-2s load time. Under
+                100KB initial payload. Designed for real African infrastructure
+                — not Silicon Valley fibre.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4 reveal" style="transition-delay: 0.3s">
+            <div class="feat-card">
+              <div class="feat-icon fi-red">
+                <i class="bi bi-chat-dots"></i>
+              </div>
+              <h4>AI Study Buddy</h4>
+              <p>
+                Students chat directly with AI about the exact topic taught in
+                class. Not generic ChatGPT — a tutor scoped to today's lesson.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ═══ AI SECTION ════════════════════════════════════════════════════════ -->
+    <section class="ai-section" id="ai">
+      <div class="ai-glow"></div>
+      <div class="container">
+        <div class="row g-5 align-items-center">
+          <div class="col-lg-5 reveal">
+            <div class="ai-pill">
+              <i class="bi bi-stars"></i> Powered by Gemini AI
+            </div>
+            <h2 class="section-title">
+              AI that knows<br />what was taught<br /><span
+                style="color: var(--teal)"
+                >today</span
+              >
+            </h2>
+            <p class="section-sub" style="margin-bottom: 32px">
+              Every AI feature in ClassPulse is scoped to the actual lesson —
+              not the entire internet. This makes it precise, relevant, and
+              genuinely useful for students.
+            </p>
+            <div class="ai-feature-row">
+              <div class="icon"><i class="bi bi-file-earmark-pdf"></i></div>
+              <div>
+                <h5>PDF → Quiz in seconds</h5>
+                <p>
+                  Upload lecture notes, get exam-ready MCQs instantly. AI reads
+                  your material and creates questions with plausible wrong
+                  answers.
+                </p>
+              </div>
+            </div>
+            <div class="ai-feature-row">
+              <div class="icon"><i class="bi bi-file-text"></i></div>
+              <div>
+                <h5>Smart Note Summaries</h5>
+                <p>
+                  AI converts dense lecture PDFs into clean, student-friendly
+                  summaries. Great for revision and accessibility.
+                </p>
+              </div>
+            </div>
+            <div class="ai-feature-row">
+              <div class="icon"><i class="bi bi-graph-up-arrow"></i></div>
+              <div>
+                <h5>Predictive Weak Spots</h5>
+                <p>
+                  ClassPulse tells students which topics they keep getting wrong
+                  — and prompts them to study it before the exam.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-7 reveal" style="transition-delay: 0.15s">
+            <!-- Chat mock -->
+            <div class="chat-mock">
+              <div class="chat-header">
+                <div class="chat-avatar">AI</div>
+                <div>
+                  <div class="chat-name">ClassPulse Study Buddy</div>
+                  <div class="chat-status">
+                    ● Active · BIO 201 — Cell Division
+                  </div>
+                </div>
+              </div>
+              <div class="chat-body">
+                <div class="chat-msg ai">
+                  Hi! I've read today's lecture on
+                  <strong>Cell Division</strong>. Ask me anything — I can
+                  explain concepts, test you with questions, or summarise a
+                  section you're struggling with.
+                </div>
+                <div class="chat-msg student">
+                  Can you explain the difference between mitosis and meiosis in
+                  simple terms?
+                </div>
+                <div class="chat-msg ai">
+                  Great question! <strong>Mitosis</strong> produces 2 identical
+                  daughter cells — used for growth and repair.
+                  <strong>Meiosis</strong> produces 4 genetically unique cells —
+                  used for reproduction. The key difference is that meiosis has
+                  two rounds of division. Your notes from today cover the phases
+                  in detail — want me to quiz you on them?
+                </div>
+                <div class="chat-msg student">Yes please, quiz me!</div>
+                <div class="chat-typing">
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ═══ STATS BAR ════════════════════════════════════════════════════════ -->
+    <div class="stats-bar">
+      <div class="container">
+        <div class="row g-0">
+          <div
+            class="col-6 col-md-3 stat-item reveal"
+            style="border-right: 1px solid var(--border)"
+          >
+            <div class="stat-val">2s</div>
+            <div class="stat-lbl">Live sync speed</div>
+          </div>
+          <div
+            class="col-6 col-md-3 stat-item reveal"
+            style="
+              border-right: 1px solid var(--border);
+              transition-delay: 0.1s;
+            "
+          >
+            <div class="stat-val">2G</div>
+            <div class="stat-lbl">Minimum network</div>
+          </div>
+          <div
+            class="col-6 col-md-3 stat-item reveal"
+            style="
+              border-right: 1px solid var(--border);
+              transition-delay: 0.2s;
+            "
+          >
+            <div class="stat-val">0</div>
+            <div class="stat-lbl">App downloads needed</div>
+          </div>
+          <div
+            class="col-6 col-md-3 stat-item reveal"
+            style="transition-delay: 0.3s"
+          >
+            <div class="stat-val">∞</div>
+            <div class="stat-lbl">Students per session</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FOOTER ════════════════════════════════════════════════════════════ -->
+    <footer>
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <div class="footer-brand">Class<span>Pulse</span></div>
+            <p class="footer-sub">
+              Real-time classroom engagement — built for Africa. Every student
+              connected. Every voice heard.
+            </p>
+          </div>
+          <div class="col-6 col-lg-2 offset-lg-2">
+            <div class="footer-link-group">
+              <h6>Product</h6>
+              <a href="#features">Features</a>
+              <a href="#ai">AI Tools</a>
+              <a href="#how">How it Works</a>
+            </div>
+          </div>
+          <div class="col-6 col-lg-2">
+            <div class="footer-link-group">
+              <h6>Access</h6>
+              <a href="student/student.html">Student Join</a>
+              <a href="#teacher">Lecturer Login</a>
+              <a href="#">Sign Up</a>
+            </div>
+          </div>
+          <div class="col-6 col-lg-2">
+            <div class="footer-link-group">
+              <h6>Company</h6>
+              <a href="#">About</a>
+              <a href="#">Contact</a>
+              <a href="#">Privacy</a>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2026 ClassPulse. Built with purpose for African education.</p>
+          <p style="color: var(--blue); font-weight: 600">
+            Every student connected. Every voice heard.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Scroll reveal
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.12 },
+      );
+      document
+        .querySelectorAll(".reveal")
+        .forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>
