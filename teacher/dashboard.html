@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassPulse · Teacher Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --navy:   #0A0F1E;
+      --navy2:  #111827;
+      --blue:   #4F8EF7;
+      --teal:   #00C9A7;
+      --white:  #FFFFFF;
+      --muted:  #8A94A6;
+      --card:   #141B2D;
+      --border: rgba(255,255,255,0.07);
+      --sidebar-w: 240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+    h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; line-height: 1.15; }
+
+    /* ── LAYOUT ── */
+    .app-layout {
+      display: flex; min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform .3s;
+    }
+    .sidebar-brand {
+      padding: 22px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 800; color: var(--white);
+      text-decoration: none;
+    }
+    .sidebar-brand span { color: var(--blue); }
+    .dot-pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--teal);
+      animation: pulse 1.8s ease-in-out infinite; flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,201,167,.5); }
+      50%      { box-shadow: 0 0 0 6px rgba(0,201,167,0); }
+    }
+    .sidebar-nav { flex: 1; padding: 16px 10px; }
+    .nav-label {
+      font-size: .68rem; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 0 10px; margin: 16px 0 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      color: var(--muted); font-size: .88rem; font-weight: 500;
+      cursor: pointer; text-decoration: none;
+      transition: background .2s, color .2s;
+      margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.05); color: var(--white); }
+    .nav-item.active { background: rgba(79,142,247,.12); color: var(--blue); }
+    .nav-item i { font-size: 1rem; width: 18px; text-align: center; }
+    .nav-badge {
+      margin-left: auto; background: var(--blue);
+      color: var(--white); font-size: .65rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 100px;
+    }
+    .sidebar-footer {
+      padding: 16px 10px;
+      border-top: 1px solid var(--border);
+    }
+    .teacher-info {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+    }
+    .teacher-avatar {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: .8rem; font-weight: 700;
+      color: var(--navy);
+    }
+    .teacher-name { font-size: .82rem; font-weight: 600; color: var(--white); }
+    .teacher-role { font-size: .7rem; color: var(--muted); }
+    .btn-logout {
+      margin-left: auto; background: none; border: none;
+      color: var(--muted); cursor: pointer; font-size: .9rem;
+      transition: color .2s; padding: 4px;
+    }
+    .btn-logout:hover { color: #F87171; }
+
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      flex: 1; display: flex; flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,15,30,.8);
+      backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .live-badge {
+      display: none; align-items: center; gap: 6px;
+      background: rgba(248,113,113,.12);
+      border: 1px solid rgba(248,113,113,.25);
+      color: #F87171; font-size: .76rem; font-weight: 700;
+      padding: 5px 12px; border-radius: 100px;
+      letter-spacing: .04em;
+    }
+    .live-badge .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #F87171;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    .btn-new-session {
+      background: var(--blue); color: var(--white);
+      border: none; border-radius: 9px;
+      padding: 9px 18px; font-size: .84rem; font-weight: 600;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: opacity .2s, transform .2s;
+    }
+    .btn-new-session:hover { opacity: .88; transform: translateY(-1px); }
+
+    /* ── SCREENS ── */
+    .screen { display: none; padding: 28px; animation: fadeIn .35s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* ── STAT CARDS ── */
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .stat-icon {
+      width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .si-blue   { background: rgba(79,142,247,.12);  color: var(--blue); }
+    .si-teal   { background: rgba(0,201,167,.12);   color: var(--teal); }
+    .si-purple { background: rgba(167,139,250,.12); color: #A78BFA; }
+    .si-amber  { background: rgba(245,158,11,.12);  color: #F59E0B; }
+    .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem; font-weight: 800; line-height: 1;
+    }
+    .stat-lbl { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+    .stat-change { font-size: .72rem; margin-top: 6px; }
+    .up   { color: var(--teal); }
+    .down { color: #F87171; }
+
+    /* ── CARDS ── */
+    .cp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px;
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: .95rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-tag {
+      font-size: .7rem; font-weight: 600; padding: 3px 10px;
+      border-radius: 100px; font-family: 'Inter', sans-serif;
+    }
+    .tag-live { background: rgba(248,113,113,.12); color: #F87171; }
+    .tag-blue { background: rgba(79,142,247,.12);  color: var(--blue); }
+
+    /* ── SESSION LIST ── */
+    .session-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .15s; border-radius: 8px;
+    }
+    .session-item:last-child { border-bottom: none; }
+    .session-item:hover { background: rgba(255,255,255,.03); padding-left: 8px; }
+    .session-dot {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(79,142,247,.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; color: var(--blue);
+    }
+    .session-name { font-size: .9rem; font-weight: 600; }
+    .session-meta { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .session-score {
+      margin-left: auto; font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .cp-label {
+      font-size: .74rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 7px; display: block;
+    }
+    .cp-input {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 10px; color: var(--white);
+      padding: 11px 14px; font-size: .9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .cp-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(79,142,247,.15);
+    }
+    .cp-input::placeholder { color: var(--muted); }
+
+    /* ── BUTTONS ── */
+    .btn-primary-cp {
+      background: var(--blue); color: var(--white);
+      border: none; border-radius: 10px; padding: 12px 22px;
+      font-size: .9rem; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      transition: opacity .2s, transform .2s, box-shadow .2s;
+    }
+    .btn-primary-cp:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,142,247,.3); }
+    .btn-teal-cp {
+      background: var(--teal); color: var(--navy);
+      border: none; border-radius: 10px; padding: 12px 22px;
+      font-size: .9rem; font-weight: 700; font-family: 'Inter', sans-serif;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      transition: opacity .2s, transform .2s;
+    }
+    .btn-teal-cp:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-danger-cp {
+      background: rgba(248,113,113,.12); color: #F87171;
+      border: 1px solid rgba(248,113,113,.25); border-radius: 10px; padding: 12px 22px;
+      font-size: .9rem; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      transition: background .2s;
+    }
+    .btn-danger-cp:hover { background: rgba(248,113,113,.2); }
+    .btn-ghost-cp {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 10px; padding: 11px 20px;
+      font-size: .88rem; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-ghost-cp:hover { border-color: rgba(255,255,255,.2); color: var(--white); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px; width: 100%; max-width: 500px;
+      animation: modalIn .3s ease;
+    }
+    @keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(10px); } to { opacity:1; transform:none; } }
+    .modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+    .modal-sub   { font-size: .84rem; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+
+    /* File upload */
+    .upload-zone {
+      border: 2px dashed rgba(79,142,247,.3);
+      border-radius: 12px; padding: 28px;
+      text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s;
+      margin-bottom: 16px;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--blue); background: rgba(79,142,247,.04); }
+    .upload-icon { font-size: 2rem; color: var(--blue); margin-bottom: 8px; }
+    .upload-text { font-size: .86rem; color: var(--muted); }
+    .upload-text strong { color: var(--white); }
+    .upload-file-name {
+      display: none; background: rgba(79,142,247,.1);
+      border: 1px solid rgba(79,142,247,.2); border-radius: 8px;
+      padding: 10px 14px; font-size: .84rem;
+      display: none; align-items: center; gap: 8px; margin-bottom: 16px;
+    }
+
+    /* ── LIVE SESSION ── */
+    .room-code-display {
+      background: rgba(79,142,247,.08);
+      border: 1px solid rgba(79,142,247,.2);
+      border-radius: 16px; padding: 20px 24px;
+      text-align: center; margin-bottom: 20px;
+    }
+    .room-code-label { font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .room-code-val {
+      font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800;
+      letter-spacing: .3em; color: var(--blue); line-height: 1;
+    }
+    .room-code-hint { font-size: .76rem; color: var(--muted); margin-top: 8px; }
+
+    /* Student list */
+    .student-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0; border-bottom: 1px solid var(--border);
+    }
+    .student-row:last-child { border-bottom: none; }
+    .s-avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(79,142,247,.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 700; color: var(--blue);
+    }
+    .s-name { font-size: .84rem; font-weight: 500; flex: 1; }
+    .s-status {
+      font-size: .72rem; font-weight: 600; padding: 3px 9px; border-radius: 100px;
+    }
+    .s-answered { background: rgba(0,201,167,.1);  color: var(--teal); }
+    .s-waiting  { background: rgba(138,148,166,.1); color: var(--muted); }
+    .s-correct  { background: rgba(0,201,167,.1);  color: var(--teal); }
+    .s-wrong    { background: rgba(248,113,113,.1); color: #F87171; }
+
+    /* Confusion live */
+    .conf-live-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .conf-live-label { font-size: .78rem; color: var(--muted); width: 55px; flex-shrink: 0; }
+    .conf-live-bar { flex: 1; background: rgba(255,255,255,.06); border-radius: 4px; height: 8px; overflow: hidden; }
+    .conf-live-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+    .conf-live-pct { font-size: .76rem; color: var(--muted); width: 32px; text-align: right; font-weight: 600; }
+
+    /* Question nav */
+    .q-nav-btn {
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 16px; color: var(--muted);
+      font-size: .84rem; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: background .2s, color .2s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .q-nav-btn:hover { background: rgba(255,255,255,.1); color: var(--white); }
+    .q-nav-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
+
+    /* ── ANALYTICS REPORT ── */
+    .report-score-big {
+      font-family: 'Syne', sans-serif;
+      font-size: 4rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .topic-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .topic-row:last-child { border-bottom: none; }
+    .topic-bar-wrap { flex: 1; background: rgba(255,255,255,.06); border-radius: 4px; height: 6px; }
+    .topic-bar-fill { height: 100%; border-radius: 4px; }
+    .topic-name { font-size: .84rem; font-weight: 500; width: 160px; flex-shrink: 0; }
+    .topic-pct { font-size: .78rem; font-weight: 600; width: 36px; text-align: right; }
+    .reteach-card {
+      background: rgba(248,113,113,.07);
+      border: 1px solid rgba(248,113,113,.18);
+      border-radius: 12px; padding: 16px 20px;
+      display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px;
+    }
+    .reteach-card i { color: #F87171; font-size: 1rem; margin-top: 2px; flex-shrink: 0; }
+    .reteach-card h6 { font-size: .88rem; font-weight: 700; margin-bottom: 3px; }
+    .reteach-card p  { font-size: .8rem; color: var(--muted); margin: 0; line-height: 1.5; }
+    .student-result-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 10px; margin-bottom: 6px;
+      background: rgba(255,255,255,.03); border: 1px solid var(--border);
+    }
+    .sr-rank {
+      font-family: 'Syne', sans-serif; font-size: .85rem; font-weight: 700;
+      color: var(--muted); width: 24px; text-align: center; flex-shrink: 0;
+    }
+    .sr-name { font-size: .86rem; font-weight: 500; flex: 1; }
+    .sr-score { font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: none; }
+      .main-content { margin-left: 0; }
+      .screen { padding: 16px; }
+      .topbar { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../index.html" class="sidebar-brand">
+      <span class="dot-pulse"></span>
+      Class<span>Pulse</span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a class="nav-item active" id="nav-home" onclick="showScreen('screen-home')">
+        <i class="bi bi-grid-1x2"></i> Dashboard
+      </a>
+      <a class="nav-item" id="nav-sessions" onclick="showScreen('screen-home')">
+        <i class="bi bi-collection"></i> My Sessions
+        <span class="nav-badge">3</span>
+      </a>
+
+      <div class="nav-label">Tools</div>
+      <a class="nav-item" onclick="openNewSession()">
+        <i class="bi bi-plus-circle"></i> New Session
+      </a>
+      <a class="nav-item" onclick="showScreen('screen-analytics')">
+        <i class="bi bi-bar-chart-line"></i> Analytics
+      </a>
+
+      <div class="nav-label">Account</div>
+      <a class="nav-item" href="#">
+        <i class="bi bi-gear"></i> Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="teacher-info">
+        <div class="teacher-avatar" id="sidebar-avatar">DR</div>
+        <div>
+          <div class="teacher-name" id="sidebar-name">Dr. Amara</div>
+          <div class="teacher-role">Lecturer</div>
+        </div>
+        <button class="btn-logout" onclick="logout()" title="Log out">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN CONTENT ══════════════════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-right">
+        <div class="live-badge" id="live-badge">
+          <span class="live-dot"></span> LIVE SESSION
+        </div>
+        <button class="btn-new-session" onclick="openNewSession()">
+          <i class="bi bi-plus-lg"></i> New Session
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SCREEN 1 — DASHBOARD HOME
+    ══════════════════════════════════════════════ -->
+    <div class="screen active" id="screen-home">
+
+      <!-- Welcome -->
+      <div class="mb-4">
+        <h2 style="font-size:1.5rem;margin-bottom:4px">Welcome back, <span id="welcome-name">Dr. Amara</span> 👋</h2>
+        <p style="color:var(--muted);font-size:.88rem">Here's an overview of your classroom activity.</p>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon si-blue"><i class="bi bi-collection-play"></i></div>
+            <div>
+              <div class="stat-val">12</div>
+              <div class="stat-lbl">Total Sessions</div>
+              <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> 3 this week</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon si-teal"><i class="bi bi-people"></i></div>
+            <div>
+              <div class="stat-val">284</div>
+              <div class="stat-lbl">Total Students</div>
+              <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> 28 this week</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon si-purple"><i class="bi bi-graph-up"></i></div>
+            <div>
+              <div class="stat-val">68%</div>
+              <div class="stat-lbl">Avg. Class Score</div>
+              <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> +4% from last week</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon si-amber"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+              <div class="stat-val">7</div>
+              <div class="stat-lbl">Students Need Help</div>
+              <div class="stat-change down"><i class="bi bi-arrow-down-short"></i> Review flagged</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <!-- Recent sessions -->
+        <div class="col-lg-7">
+          <div class="cp-card">
+            <div class="card-title">
+              Recent Sessions
+              <span class="card-tag tag-blue">Last 7 days</span>
+            </div>
+            <div class="session-item">
+              <div class="session-dot"><i class="bi bi-mortarboard"></i></div>
+              <div>
+                <div class="session-name">Cell Division — Chapter 4</div>
+                <div class="session-meta">Today · 28 students · 5 questions</div>
+              </div>
+              <div class="session-score" style="color:var(--teal)">72%</div>
+            </div>
+            <div class="session-item">
+              <div class="session-dot"><i class="bi bi-mortarboard"></i></div>
+              <div>
+                <div class="session-name">Photosynthesis — Chapter 3</div>
+                <div class="session-meta">Yesterday · 31 students · 8 questions</div>
+              </div>
+              <div class="session-score" style="color:var(--blue)">65%</div>
+            </div>
+            <div class="session-item">
+              <div class="session-dot"><i class="bi bi-mortarboard"></i></div>
+              <div>
+                <div class="session-name">DNA Replication Quiz</div>
+                <div class="session-meta">2 days ago · 29 students · 10 questions</div>
+              </div>
+              <div class="session-score" style="color:#F59E0B">58%</div>
+            </div>
+            <div class="session-item">
+              <div class="session-dot"><i class="bi bi-mortarboard"></i></div>
+              <div>
+                <div class="session-name">Intro to Genetics</div>
+                <div class="session-meta">4 days ago · 30 students · 6 questions</div>
+              </div>
+              <div class="session-score" style="color:var(--teal)">81%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="col-lg-5">
+          <div class="cp-card mb-3">
+            <div class="card-title">Quick Actions</div>
+            <div class="d-flex flex-column gap-2">
+              <button class="btn-primary-cp w-100 justify-content-start" onclick="openNewSession()">
+                <i class="bi bi-plus-circle-fill"></i> Start New Session
+              </button>
+              <button class="btn-ghost-cp w-100 justify-content-start" onclick="showScreen('screen-analytics')">
+                <i class="bi bi-bar-chart-line"></i> View Analytics Report
+              </button>
+              <button class="btn-ghost-cp w-100 justify-content-start">
+                <i class="bi bi-file-earmark-arrow-up"></i> Upload Lecture Notes
+              </button>
+            </div>
+          </div>
+
+          <!-- Students needing help -->
+          <div class="cp-card">
+            <div class="card-title">
+              Needs Attention
+              <span class="card-tag" style="background:rgba(248,113,113,.1);color:#F87171">7 students</span>
+            </div>
+            <div class="student-row">
+              <div class="s-avatar">AO</div>
+              <div class="s-name">Amara Okafor</div>
+              <span class="s-status s-wrong">Below 50%</span>
+            </div>
+            <div class="student-row">
+              <div class="s-avatar">KA</div>
+              <div class="s-name">Kwame Asante</div>
+              <span class="s-status s-wrong">Below 50%</span>
+            </div>
+            <div class="student-row">
+              <div class="s-avatar">FN</div>
+              <div class="s-name">Fatima Nwosu</div>
+              <span class="s-status s-wrong">Below 50%</span>
+            </div>
+            <p style="font-size:.76rem;color:var(--muted);margin-top:12px;text-align:center">
+              +4 more students flagged this week
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════
+         SCREEN 2 — LIVE SESSION
+    ══════════════════════════════════════════════ -->
+    <div class="screen" id="screen-live">
+
+      <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <div>
+          <h2 style="font-size:1.3rem;margin-bottom:4px" id="live-session-title">Cell Division — Chapter 4</h2>
+          <p style="color:var(--muted);font-size:.84rem">Session is live. Students can join now.</p>
+        </div>
+        <button class="btn-danger-cp" onclick="confirmEndSession()">
+          <i class="bi bi-stop-circle"></i> End Session
+        </button>
+      </div>
+
+      <div class="row g-3">
+
+        <!-- Room code + question nav -->
+        <div class="col-lg-4">
+          <div class="cp-card mb-3">
+            <div class="room-code-display">
+              <div class="room-code-label">Room Code</div>
+              <div class="room-code-val" id="live-room-code">ABC123</div>
+              <div class="room-code-hint">Share this with your students</div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span style="font-size:.78rem;color:var(--muted)">Students joined</span>
+              <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--teal)" id="live-student-count">28</span>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:8px;height:6px;overflow:hidden">
+              <div style="background:var(--teal);height:100%;width:93%;border-radius:8px"></div>
+            </div>
+          </div>
+
+          <!-- Question navigation -->
+          <div class="cp-card">
+            <div class="card-title">Questions</div>
+            <div class="d-flex flex-wrap gap-2" id="q-nav">
+              <!-- Injected by JS -->
+            </div>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+              <div style="font-size:.76rem;color:var(--muted);margin-bottom:8px">Current Question</div>
+              <div style="font-size:.86rem;font-weight:600;line-height:1.4" id="current-q-text">
+                What is the primary difference between mitosis and meiosis?
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live chart + confusion -->
+        <div class="col-lg-5">
+          <div class="cp-card mb-3">
+            <div class="card-title">
+              Live Responses
+              <span class="card-tag tag-live" id="responses-count">21 / 28</span>
+            </div>
+            <canvas id="liveChart" height="160"></canvas>
+          </div>
+
+          <div class="cp-card">
+            <div class="card-title">
+              Confusion Meter
+              <span class="card-tag tag-blue">Live</span>
+            </div>
+            <div class="conf-live-row">
+              <span class="conf-live-label">Got it</span>
+              <div class="conf-live-bar"><div class="conf-live-fill" id="conf-got-bar" style="width:64%;background:var(--teal)"></div></div>
+              <span class="conf-live-pct" id="conf-got-pct">64%</span>
+            </div>
+            <div class="conf-live-row">
+              <span class="conf-live-label">Unsure</span>
+              <div class="conf-live-bar"><div class="conf-live-fill" id="conf-unsure-bar" style="width:24%;background:#F59E0B"></div></div>
+              <span class="conf-live-pct" id="conf-unsure-pct">24%</span>
+            </div>
+            <div class="conf-live-row">
+              <span class="conf-live-label">Lost</span>
+              <div class="conf-live-bar"><div class="conf-live-fill" id="conf-lost-bar" style="width:12%;background:#F87171"></div></div>
+              <span class="conf-live-pct" id="conf-lost-pct">12%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student list -->
+        <div class="col-lg-3">
+          <div class="cp-card" style="max-height:520px;overflow-y:auto">
+            <div class="card-title">Students</div>
+            <div id="live-student-list">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════
+         SCREEN 3 — ANALYTICS REPORT
+    ══════════════════════════════════════════════ -->
+    <div class="screen" id="screen-analytics">
+
+      <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <div>
+          <h2 style="font-size:1.3rem;margin-bottom:4px">Session Report</h2>
+          <p style="color:var(--muted);font-size:.84rem" id="report-session-name">Cell Division — Chapter 4 · Today · 28 students</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn-ghost-cp"><i class="bi bi-download"></i> Export PDF</button>
+          <button class="btn-primary-cp" onclick="showScreen('screen-home')"><i class="bi bi-arrow-left"></i> Back</button>
+        </div>
+      </div>
+
+      <div class="row g-3">
+
+        <!-- Score overview -->
+        <div class="col-lg-4">
+          <div class="cp-card text-center mb-3">
+            <div style="font-size:.74rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Class Average</div>
+            <div class="report-score-big">72%</div>
+            <p style="font-size:.82rem;color:var(--muted);margin-top:8px">Above passing threshold (60%)</p>
+            <div style="display:flex;justify-content:space-around;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <div>
+                <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--teal)">20</div>
+                <div style="font-size:.72rem;color:var(--muted)">Passed</div>
+              </div>
+              <div>
+                <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:#F87171">8</div>
+                <div style="font-size:.72rem;color:var(--muted)">Failed</div>
+              </div>
+              <div>
+                <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700">28</div>
+                <div style="font-size:.72rem;color:var(--muted)">Total</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Insight -->
+          <div style="
+            background: rgba(0,201,167,.07);
+            border: 1px solid rgba(0,201,167,.2);
+            border-radius: 14px; padding: 18px;
+          ">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <i class="bi bi-stars" style="color:var(--teal)"></i>
+              <span style="font-size:.8rem;font-weight:700;color:var(--teal)">AI Insight</span>
+            </div>
+            <p style="font-size:.82rem;color:var(--muted);line-height:1.6;margin:0">
+              The class performed well overall, but <strong style="color:var(--white)">Meiosis vs Mitosis</strong> had the lowest correct rate at 43%. Consider re-teaching the phases of meiosis next class. 8 students scored below 60% — early intervention recommended.
+            </p>
+          </div>
+        </div>
+
+        <!-- Topic performance + Re-teach -->
+        <div class="col-lg-5">
+          <div class="cp-card mb-3">
+            <div class="card-title">Topic Performance</div>
+            <div class="topic-row">
+              <span class="topic-name">Cell Structure</span>
+              <div class="topic-bar-wrap"><div class="topic-bar-fill" style="width:88%;background:var(--teal)"></div></div>
+              <span class="topic-pct" style="color:var(--teal)">88%</span>
+            </div>
+            <div class="topic-row">
+              <span class="topic-name">Mitosis Phases</span>
+              <div class="topic-bar-wrap"><div class="topic-bar-fill" style="width:74%;background:var(--blue)"></div></div>
+              <span class="topic-pct" style="color:var(--blue)">74%</span>
+            </div>
+            <div class="topic-row">
+              <span class="topic-name">Meiosis vs Mitosis</span>
+              <div class="topic-bar-wrap"><div class="topic-bar-fill" style="width:43%;background:#F87171"></div></div>
+              <span class="topic-pct" style="color:#F87171">43%</span>
+            </div>
+            <div class="topic-row">
+              <span class="topic-name">Chromosome Count</span>
+              <div class="topic-bar-wrap"><div class="topic-bar-fill" style="width:61%;background:#F59E0B"></div></div>
+              <span class="topic-pct" style="color:#F59E0B">61%</span>
+            </div>
+            <div class="topic-row">
+              <span class="topic-name">Cell Cycle</span>
+              <div class="topic-bar-wrap"><div class="topic-bar-fill" style="width:79%;background:var(--blue)"></div></div>
+              <span class="topic-pct" style="color:var(--blue)">79%</span>
+            </div>
+          </div>
+
+          <!-- Re-teach Priority -->
+          <div class="cp-card">
+            <div class="card-title">
+              Re-teach Priority
+              <span class="card-tag" style="background:rgba(248,113,113,.1);color:#F87171">2 topics</span>
+            </div>
+            <div class="reteach-card">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <div>
+                <h6>Meiosis vs Mitosis</h6>
+                <p>Only 43% answered correctly. Focus on the two-round division process and genetic uniqueness in meiosis.</p>
+              </div>
+            </div>
+            <div class="reteach-card">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <div>
+                <h6>Chromosome Count</h6>
+                <p>61% correct — students are confusing haploid vs diploid numbers. A visual diagram would help.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student rankings -->
+        <div class="col-lg-3">
+          <div class="cp-card">
+            <div class="card-title">Student Results</div>
+            <div class="student-result-row">
+              <span class="sr-rank">🥇</span>
+              <span class="sr-name">Chioma E.</span>
+              <span class="sr-score" style="color:var(--teal)">100%</span>
+            </div>
+            <div class="student-result-row">
+              <span class="sr-rank">🥈</span>
+              <span class="sr-name">Emeka T.</span>
+              <span class="sr-score" style="color:var(--teal)">95%</span>
+            </div>
+            <div class="student-result-row">
+              <span class="sr-rank">🥉</span>
+              <span class="sr-name">Adaeze M.</span>
+              <span class="sr-score" style="color:var(--teal)">90%</span>
+            </div>
+            <div class="student-result-row">
+              <span class="sr-rank" style="color:var(--muted)">4</span>
+              <span class="sr-name">Yusuf B.</span>
+              <span class="sr-score" style="color:var(--blue)">85%</span>
+            </div>
+            <div class="student-result-row">
+              <span class="sr-rank" style="color:var(--muted)">5</span>
+              <span class="sr-name">Ngozi A.</span>
+              <span class="sr-score" style="color:var(--blue)">80%</span>
+            </div>
+            <div style="border-top:1px solid var(--border);margin:10px 0;padding-top:10px">
+              <div style="font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:8px">Needs Intervention</div>
+            </div>
+            <div class="student-result-row">
+              <span class="sr-rank" style="color:#F87171">↓</span>
+              <span class="sr-name">Amara O.</span>
+              <span class="sr-score" style="color:#F87171">40%</span>
+            </div>
+            <div class="student-result-row">
+              <span class="sr-rank" style="color:#F87171">↓</span>
+              <span class="sr-name">Kwame A.</span>
+              <span class="sr-score" style="color:#F87171">35%</span>
+            </div>
+            <div class="student-result-row">
+              <span class="sr-rank" style="color:#F87171">↓</span>
+              <span class="sr-name">Fatima N.</span>
+              <span class="sr-score" style="color:#F87171">30%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end main-content -->
+</div><!-- end app-layout -->
+
+
+<!-- ══ NEW SESSION MODAL ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-new-session">
+  <div class="modal-box">
+    <div class="modal-title">Start a New Session</div>
+    <div class="modal-sub">Give your session a name, optionally upload lecture notes, and ClassPulse AI will generate quiz questions automatically.</div>
+
+    <div class="mb-3">
+      <label class="cp-label">Session Name</label>
+      <input class="cp-input" id="session-name-input" type="text" placeholder="e.g. Cell Division — Chapter 4" />
+    </div>
+
+    <div class="mb-3">
+      <label class="cp-label">Subject / Course</label>
+      <input class="cp-input" id="session-course-input" type="text" placeholder="e.g. Biology 201" />
+    </div>
+
+    <div class="mb-3">
+      <label class="cp-label">Upload Lecture Notes (optional)</label>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleDrop(event)">
+        <div class="upload-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+        <div class="upload-text"><strong>Click to upload</strong> or drag & drop<br>PDF, DOCX, images up to 20MB</div>
+      </div>
+      <div class="upload-file-name" id="upload-file-name">
+        <i class="bi bi-file-earmark-check" style="color:var(--teal)"></i>
+        <span id="upload-file-text">file.pdf</span>
+        <i class="bi bi-x ms-auto" style="cursor:pointer;color:var(--muted)" onclick="clearFile()"></i>
+      </div>
+      <input type="file" id="file-input" style="display:none" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" onchange="handleFileSelect(this)" />
+    </div>
+
+    <div class="mb-4">
+      <label class="cp-label">Number of Questions</label>
+      <select class="cp-input" id="q-count-input" style="cursor:pointer">
+        <option value="5">5 questions</option>
+        <option value="10" selected>10 questions</option>
+        <option value="15">15 questions</option>
+        <option value="20">20 questions</option>
+      </select>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn-ghost-cp flex-fill" onclick="closeModal()">Cancel</button>
+      <button class="btn-teal-cp flex-fill" onclick="launchSession()">
+        <i class="bi bi-lightning-charge-fill"></i> Launch Session
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ END SESSION CONFIRM MODAL ══════════════════════════════════ -->
+<div class="modal-overlay" id="modal-end-session">
+  <div class="modal-box">
+    <div class="modal-title">End Session?</div>
+    <div class="modal-sub">This will stop the quiz for all students. ClassPulse AI will immediately generate a full analytics report for this session.</div>
+    <div class="d-flex gap-2">
+      <button class="btn-ghost-cp flex-fill" onclick="closeModal()">Keep Going</button>
+      <button class="btn-danger-cp flex-fill" onclick="endSession()">
+        <i class="bi bi-stop-circle"></i> End & Generate Report
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // ── DEMO DATA ────────────────────────────────
+  const demoStudents = [
+    'Chioma E.','Emeka T.','Adaeze M.','Yusuf B.','Ngozi A.',
+    'Tunde F.','Blessing O.','Chidi I.','Amara O.','Kwame A.',
+    'Fatima N.','Seun B.','Kemi A.','Ola D.','Ifeanyi C.',
+    'Zara M.','Bayo T.','Nkechi U.','Seyi R.','Dami L.',
+    'Kunle O.','Ada P.','Femi S.','Tobi A.','Gbenga M.',
+    'Sola N.','Remi K.','Taiwo B.'
+  ];
+
+  const demoQuestions = [
+    'What is the primary difference between mitosis and meiosis?',
+    'Which phase involves chromosomes lining up at the equator?',
+    'How many chromosomes does a human cell have after meiosis?',
+    'What is the result of cytokinesis?',
+    'Which type of cell division produces gametes?'
+  ];
+
+  let liveChart = null;
+  let sessionActive = false;
+
+  // ── SCREENS ──────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+
+    const titles = {
+      'screen-home':      'Dashboard',
+      'screen-live':      'Live Session',
+      'screen-analytics': 'Analytics Report'
+    };
+    document.getElementById('topbar-title').textContent = titles[id] || 'Dashboard';
+
+    // Nav highlight
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (id === 'screen-home')      document.getElementById('nav-home').classList.add('active');
+    if (id === 'screen-analytics') document.getElementById('nav-sessions').classList.add('active');
+  }
+
+  // ── MODALS ───────────────────────────────────
+  function openNewSession() {
+    document.getElementById('modal-new-session').classList.add('open');
+  }
+  function closeModal() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+  }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) closeModal(); });
+  });
+
+  // ── FILE UPLOAD ───────────────────────────────
+  function handleFileSelect(input) {
+    if (input.files[0]) showFile(input.files[0].name);
+  }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.remove('drag');
+    if (e.dataTransfer.files[0]) showFile(e.dataTransfer.files[0].name);
+  }
+  function showFile(name) {
+    document.getElementById('upload-zone').style.display = 'none';
+    const fn = document.getElementById('upload-file-name');
+    document.getElementById('upload-file-text').textContent = name;
+    fn.style.display = 'flex';
+  }
+  function clearFile() {
+    document.getElementById('upload-zone').style.display = 'block';
+    document.getElementById('upload-file-name').style.display = 'none';
+    document.getElementById('file-input').value = '';
+  }
+
+  // ── LAUNCH SESSION ────────────────────────────
+  function launchSession() {
+    const name = document.getElementById('session-name-input').value.trim();
+    if (!name) {
+      document.getElementById('session-name-input').style.borderColor = '#F87171';
+      return;
+    }
+    closeModal();
+    sessionActive = true;
+
+    // Generate room code
+    const code = Math.random().toString(36).substring(2,8).toUpperCase();
+    document.getElementById('live-room-code').textContent = code;
+    document.getElementById('live-session-title').textContent = name;
+
+    // Show live badge
+    document.getElementById('live-badge').style.display = 'flex';
+
+    // Build question nav
+    buildQNav();
+
+    // Build student list
+    buildStudentList();
+
+    // Init chart
+    initLiveChart();
+
+    // Show live screen
+    showScreen('screen-live');
+
+    // Simulate live updates
+    simulateLive();
+  }
+
+  // ── QUESTION NAV ──────────────────────────────
+  function buildQNav() {
+    const nav = document.getElementById('q-nav');
+    nav.innerHTML = '';
+    demoQuestions.forEach((q, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'q-nav-btn' + (i === 0 ? ' active' : '');
+      btn.textContent = 'Q' + (i + 1);
+      btn.onclick = () => {
+        document.querySelectorAll('.q-nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('current-q-text').textContent = demoQuestions[i];
+      };
+      nav.appendChild(btn);
+    });
+  }
+
+  // ── STUDENT LIST ──────────────────────────────
+  function buildStudentList() {
+    const list = document.getElementById('live-student-list');
+    list.innerHTML = '';
+    demoStudents.forEach((name, i) => {
+      const row = document.createElement('div');
+      row.className = 'student-row';
+      row.id = 'student-row-' + i;
+      const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2);
+      row.innerHTML = `
+        <div class="s-avatar">${initials}</div>
+        <div class="s-name">${name}</div>
+        <span class="s-status s-waiting" id="s-status-${i}">Waiting</span>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  // ── LIVE CHART ────────────────────────────────
+  function initLiveChart() {
+    const ctx = document.getElementById('liveChart').getContext('2d');
+    if (liveChart) liveChart.destroy();
+    liveChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['A', 'B', 'C', 'D'],
+        datasets: [{
+          data: [0, 0, 0, 0],
+          backgroundColor: [
+            'rgba(0,201,167,.7)',
+            'rgba(248,113,113,.7)',
+            'rgba(248,113,113,.7)',
+            'rgba(79,142,247,.5)',
+          ],
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8A94A6' } },
+          y: {
+            grid: { color: 'rgba(255,255,255,.05)' },
+            ticks: { color: '#8A94A6', stepSize: 5 },
+            beginAtZero: true, max: 30
+          }
+        }
+      }
+    });
+  }
+
+  // ── SIMULATE LIVE ─────────────────────────────
+  function simulateLive() {
+    let answered = 0;
+    const answers = [0, 0, 0, 0];
+    const total   = demoStudents.length;
+    const interval = setInterval(() => {
+      if (answered >= total) { clearInterval(interval); return; }
+      // Random student answers
+      const studentIdx = answered;
+      const answerIdx  = Math.random() < 0.65 ? 1 : Math.floor(Math.random() * 4);
+      answers[answerIdx]++;
+      answered++;
+
+      // Update chart
+      if (liveChart) {
+        liveChart.data.datasets[0].data = [...answers];
+        liveChart.update('none');
+      }
+
+      // Update student status
+      const statusEl = document.getElementById('s-status-' + studentIdx);
+      if (statusEl) {
+        statusEl.className = 's-status ' + (answerIdx === 1 ? 's-correct' : 's-wrong');
+        statusEl.textContent = answerIdx === 1 ? 'Correct' : 'Wrong';
+      }
+
+      // Update count
+      document.getElementById('responses-count').textContent = answered + ' / ' + total;
+
+      // Simulate confusion meter drift
+      const got    = 55 + Math.floor(Math.random() * 15);
+      const unsure = 20 + Math.floor(Math.random() * 10);
+      const lost   = 100 - got - unsure;
+      document.getElementById('conf-got-bar').style.width    = got + '%';
+      document.getElementById('conf-unsure-bar').style.width = unsure + '%';
+      document.getElementById('conf-lost-bar').style.width   = lost + '%';
+      document.getElementById('conf-got-pct').textContent    = got + '%';
+      document.getElementById('conf-unsure-pct').textContent = unsure + '%';
+      document.getElementById('conf-lost-pct').textContent   = lost + '%';
+
+    }, 350);
+  }
+
+  // ── END SESSION ───────────────────────────────
+  function confirmEndSession() {
+    document.getElementById('modal-end-session').classList.add('open');
+  }
+  function endSession() {
+    closeModal();
+    sessionActive = false;
+    document.getElementById('live-badge').style.display = 'none';
+    showScreen('screen-analytics');
+  }
+
+  // ── LOGOUT ───────────────────────────────────
+  function logout() {
+    if (confirm('Log out of ClassPulse?')) {
+      window.location.href = 'login.html';
+    }
+  }
+</script>
+
+</body>
+</html>
