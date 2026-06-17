@@ -507,62 +507,64 @@
   }
 
   // ── LOGIN ─────────────────────────────────────
-  function handleLogin() {
-    hideAllAlerts();
-    const email = document.getElementById('login-email').value.trim();
-    const pw    = document.getElementById('login-password').value;
+async function handleLogin() {
+  hideAllAlerts()
+  const email = document.getElementById('login-email').value.trim()
+  const pw    = document.getElementById('login-password').value
 
-    if (!email || !pw) {
-      showAlert('login-error', 'Please enter your email and password.');
-      return;
-    }
-    if (!isValidEmail(email)) {
-      showAlert('login-error', 'Please enter a valid email address.');
-      return;
-    }
-
-    setLoading('login', true);
-
-    // TODO: Replace with real Supabase auth
-    // supabase.auth.signInWithPassword({ email, password: pw })
-    setTimeout(() => {
-      setLoading('login', false);
-      // Demo: go to dashboard
-      window.location.href = 'dashboard.html';
-    }, 1800);
+  if (!email || !pw) {
+    showAlert('login-error', 'Please enter your email and password.')
+    return
   }
+  if (!isValidEmail(email)) {
+    showAlert('login-error', 'Please enter a valid email address.')
+    return
+  }
+
+  setLoading('login', true)
+
+  try {
+    await logIn(email, pw)
+    window.location.href = 'dashboard.html'
+  } catch (err) {
+    setLoading('login', false)
+    showAlert('login-error', 'Incorrect email or password. Please try again.')
+  }
+}
 
   // ── SIGNUP ────────────────────────────────────
-  function handleSignup() {
-    hideAllAlerts();
-    const name   = document.getElementById('signup-name').value.trim();
-    const email  = document.getElementById('signup-email').value.trim();
-    const course = document.getElementById('signup-course').value.trim();
-    const pw     = document.getElementById('signup-password').value;
+async function handleSignup() {
+  hideAllAlerts()
+  const name   = document.getElementById('signup-name').value.trim()
+  const email  = document.getElementById('signup-email').value.trim()
+  const course = document.getElementById('signup-course').value.trim()
+  const pw     = document.getElementById('signup-password').value
 
-    if (!name || !email || !course || !pw) {
-      showAlert('signup-error', 'Please fill in all fields.');
-      return;
-    }
-    if (!isValidEmail(email)) {
-      showAlert('signup-error', 'Please enter a valid email address.');
-      return;
-    }
-    if (pw.length < 8) {
-      showAlert('signup-error', 'Password must be at least 8 characters.');
-      return;
-    }
-
-    setLoading('signup', true);
-
-    // TODO: Replace with real Supabase auth
-    // supabase.auth.signUp({ email, password: pw, options: { data: { full_name: name, course } } })
-    setTimeout(() => {
-      setLoading('signup', false);
-      showAlert('signup-success');
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
-    }, 1800);
+  if (!name || !email || !course || !pw) {
+    showAlert('signup-error', 'Please fill in all fields.')
+    return
   }
+  if (!isValidEmail(email)) {
+    showAlert('signup-error', 'Please enter a valid email address.')
+    return
+  }
+  if (pw.length < 8) {
+    showAlert('signup-error', 'Password must be at least 8 characters.')
+    return
+  }
+
+  setLoading('signup', true)
+
+  try {
+    await signUp(name, email, course, pw)
+    setLoading('signup', false)
+    showAlert('signup-success')
+    setTimeout(() => { window.location.href = 'dashboard.html' }, 1500)
+  } catch (err) {
+    setLoading('signup', false)
+    showAlert('signup-error', err.message || 'Something went wrong. Please try again.')
+  }
+}
 
   // ── FORGOT PASSWORD ───────────────────────────
   function showForgot() {
@@ -587,6 +589,7 @@
     if (loginActive) handleLogin(); else handleSignup();
   });
 </script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/superbase.js"></script>
 </body>
 </html>
